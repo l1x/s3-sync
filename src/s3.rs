@@ -293,9 +293,6 @@ async fn determine_downloads_to_local(
         .collect();
 
     for (s3_key, etag) in s3_objects {
-        // let local_rel_path = s3_key.replace("/", &std::path::MAIN_SEPARATOR.to_string());
-        // let local_full_path = base_dir.join(&local_rel_path);
-
         if let Some(local_path) = local_file_map.get(s3_key) {
             // File exists locally, check if it's different
             match calculate_file_hash(local_path).await {
@@ -388,6 +385,14 @@ async fn upload_files(
                     )
                 };
 
+                // Use tracing for file operation messages, but make sure we're on a fresh line first
+                {
+                    // Print a carriage return to ensure we're not overwriting the progress bar
+                    use std::io::Write;
+                    let mut stdout = std::io::stdout();
+                    let _ = write!(stdout, "\r\x1B[2K");
+                    let _ = stdout.flush();
+                }
                 info!(
                     "Uploading: {} -> s3://{}/{}",
                     path.display(),
@@ -532,6 +537,14 @@ async fn download_files(
                 let local_rel_path = obj_key.replace("/", &std::path::MAIN_SEPARATOR.to_string());
                 let local_path = base_dir.join(&local_rel_path);
 
+                // Use tracing for file operation messages, but make sure we're on a fresh line first
+                {
+                    // Print a carriage return to ensure we're not overwriting the progress bar
+                    use std::io::Write;
+                    let mut stdout = std::io::stdout();
+                    let _ = write!(stdout, "\r\x1B[2K");
+                    let _ = stdout.flush();
+                }
                 info!(
                     "Downloading: s3://{}/{} -> {}",
                     bucket,

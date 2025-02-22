@@ -47,10 +47,6 @@ impl ProgressTracker {
         self.total_bytes = total;
     }
 
-    // pub fn add_total_bytes(&mut self, bytes: u64) {
-    //     self.total_bytes += bytes;
-    // }
-
     fn format_bytes(bytes: u64) -> String {
         const KB: u64 = 1024;
         const MB: u64 = KB * 1024;
@@ -117,6 +113,14 @@ impl ProgressTracker {
             0.0
         };
 
+        // Clear any progress line first
+        {
+            use std::io::Write;
+            let mut stdout = std::io::stdout();
+            let _ = write!(stdout, "\r\x1B[2K");
+            let _ = stdout.flush();
+        }
+
         info!(
             "Transfer completed: {} transferred in {:.1}s ({}/s)",
             Self::format_bytes(self.processed_bytes),
@@ -137,7 +141,8 @@ pub async fn run_progress_reporter(progress: Arc<Mutex<ProgressTracker>>) {
             if tracker.in_progress && (tracker.last_update.elapsed() >= update_interval) {
                 let message = tracker.get_progress_message();
                 // Use print! instead of info! to overwrite the line
-                print!("\r{}", message);
+                // Clear the line first, then print the progress
+                print!("\r\x1B[2K{}", message);
                 // Flush stdout to ensure the message is displayed
                 use std::io::Write;
                 let _ = std::io::stdout().flush();
