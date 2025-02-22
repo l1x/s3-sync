@@ -1,0 +1,32 @@
+[package]
+name = "s3-sync"
+version = "0.1.0"
+edition = "2021"
+authors = ["<dev@l1x.be>"]
+description = "A multithreaded AWS S3 sync tool written in Rust"
+
+[dependencies]
+# Error handling
+anyhow = "1.0.71"
+# AWS SDK for Rust
+aws-config = "1.5.16"
+aws-sdk-s3 = "1.76.0"
+aws-smithy-types = "1.2.13"
+# Command line argument parsing
+clap = { version = "4.3.0", features = ["derive"] }
+futures = "0.3.28"
+# Crypto for file hashing
+md-5 = "0.10.6"
+# Async runtime
+tokio = { version = "1.28.2", features = ["full"] }
+# Logging (optional but recommended)
+tracing = "0.1.37"
+tracing-subscriber = { version = "0.3.17", features = ["env-filter"] }
+
+[profile.release]
+# Optimize for size and speed
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true      # Strip symbols from binary
